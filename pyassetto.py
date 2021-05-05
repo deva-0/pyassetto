@@ -5,6 +5,18 @@ import time
 from directkeys import PressKey, ReleaseKey, UpArrow, LeftArrow, RightArrow, DownArrow
 import pyautogui
 
+
+def draw_lines(img, lines):
+    try:
+        for line in lines:
+            coords = line[0]
+            cv2.line(
+                img, (coords[0], coords[1]), (coords[2], coords[3]), [255, 255, 255], 3
+            )
+    except:
+        pass
+
+
 # define region of interest
 def roi(img, vertices):
     mask = np.zeros_like(img)
@@ -19,10 +31,16 @@ def process_img(original_image):
         processed_img, threshold1=200, threshold2=300
     )  # tweakable
 
+    processed_img = cv2.GaussianBlur(processed_img, (5, 5), 0)
+
     vertices = np.array(
         [[10, 500], [10, 300], [300, 200], [500, 200], [800, 300], [800, 500]]
     )
     processed_img = roi(processed_img, [vertices])
+
+    lines = cv2.HoughLinesP(processed_img, 1, np.pi / 180, 180, 20, 15)  # edges
+    draw_lines(processed_img, lines)
+
     return processed_img
 
 
