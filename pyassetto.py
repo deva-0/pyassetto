@@ -4,8 +4,34 @@ import cv2
 import time
 from numpy import ones, vstack
 from numpy.linalg import lstsq
-from directkeys import PressKey, UpArrow, DownArrow, LeftArrow, RightArrow
+from directkeys import PressKey, ReleaseKey, UpArrow, DownArrow, LeftArrow, RightArrow
 from statistics import mean
+
+
+def straight():
+    PressKey(UpArrow)
+    ReleaseKey(LeftArrow)
+    ReleaseKey(RightArrow)
+
+
+def left():
+    PressKey(LeftArrow)
+    ReleaseKey(UpArrow)
+    ReleaseKey(RightArrow)
+    ReleaseKey(LeftArrow)
+
+
+def right():
+    PressKey(RightArrow)
+    ReleaseKey(LeftArrow)
+    ReleaseKey(UpArrow)
+    ReleaseKey(RightArrow)
+
+
+def slow_ya_roll():
+    ReleaseKey(UpArrow)
+    ReleaseKey(LeftArrow)
+    ReleaseKey(RightArrow)
 
 
 def roi(img, vertices):
@@ -32,7 +58,6 @@ def draw_lanes(img, lines, color=[0, 255, 255], thickness=3):
 
         for idx, i in enumerate(lines):
             for xyxy in i:
-                # http://stackoverflow.com/questions/21565994/method-to-return-the-equation-of-a-straight-line-given-two-points
                 x_coords = (xyxy[0], xyxy[2])
                 y_coords = (xyxy[1], xyxy[3])
                 A = vstack([x_coords, ones(len(x_coords))]).T
@@ -98,7 +123,12 @@ def draw_lanes(img, lines, color=[0, 255, 255], thickness=3):
         l1_x1, l1_y1, l1_x2, l1_y2 = average_lane(final_lanes[lane1_id])
         l2_x1, l2_y1, l2_x2, l2_y2 = average_lane(final_lanes[lane2_id])
 
-        return [l1_x1, l1_y1, l1_x2, l1_y2], [l2_x1, l2_y1, l2_x2, l2_y2]
+        return (
+            [l1_x1, l1_y1, l1_x2, l1_y2],
+            [l2_x1, l2_y1, l2_x2, l2_y2],
+            lane1_id,
+            lane2_id,
+        )
     except Exception as e:
         print(str(e))
 
@@ -126,9 +156,11 @@ def process_img(image):
 
     processed_img = roi(processed_img, [vertices])
 
-    lines = cv2.HoughLinesP(processed_img, 1, np.pi / 180, 180, 20, 15)
+    lines = cv2.HoughLinesP(processed_img, 1, np.pi / 180, 180, 500, 30)
+    m1 = 0
+    m2 = 0
     try:
-        l1, l2 = draw_lanes(original_image, lines)
+        l1, l2, m1, m2 = draw_lanes(original_image, lines)
         cv2.line(original_image, (l1[0], l1[1]), (l1[2], l1[3]), [0, 255, 0], 30)
         cv2.line(original_image, (l2[0], l2[1]), (l2[2], l2[3]), [0, 255, 0], 30)
     except Exception as e:
@@ -151,15 +183,23 @@ def process_img(image):
     except Exception as e:
         pass
 
-    return processed_img, original_image
+    return processed_img, original_image, m1, m2
 
 
 def main():
     while True:
         screen = np.array(ImageGrab.grab(bbox=(0, 40, 800, 640)))
-        new_screen, original_image = process_img(screen)
+        new_screen, original_image, m1, m2 = process_img(screen)
         cv2.imshow("window", new_screen)
-        cv2.imshow("window2", cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+        # cv2.imshow("window2", cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
+
+        if m1 < 0 and m2 < 0:
+            right()
+        elif m1 > 0 and m2 > 0:
+            left()
+        else:
+            straight()
+
         # cv2.imshow('window',cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
         if cv2.waitKey(25) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
