@@ -5,7 +5,6 @@ import win32gui, win32ui, win32con, win32api
 
 def grab_screen(region=None):
     hwin = win32gui.GetDesktopWindow()
-
     if region:
         left, top, x2, y2 = region
         width = x2 - left + 1

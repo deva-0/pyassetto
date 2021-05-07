@@ -120,3 +120,7 @@ log/pyassetto-highlands-0.001-alexnetv2-8-epochs.model/events.out.tfevents.16203
 pyassetto-highlands-0.001-alexnetv2-8-epochs.model.data-00000-of-00001
 pyassetto-highlands-0.001-alexnetv2-8-epochs.model.index
 pyassetto-highlands-0.001-alexnetv2-8-epochs.model.meta
+*.XPS
+*.data-00000-of-00001
+*.meta
+*.index

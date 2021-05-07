@@ -3,12 +3,18 @@ import time
 
 SendInput = ctypes.windll.user32.SendInput
 
+
 W = 0x11
 A = 0x1E
 S = 0x1F
 D = 0x20
 
+NP_2 = 0x50
+NP_4 = 0x4B
+NP_6 = 0x4D
+NP_8 = 0x48
 
+# C struct redefinitions
 PUL = ctypes.POINTER(ctypes.c_ulong)
 
 
@@ -49,6 +55,9 @@ class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong), ("ii", Input_I)]
 
 
+# Actuals Functions
+
+
 def PressKey(hexKeyCode):
     extra = ctypes.c_ulong(0)
     ii_ = Input_I()
@@ -66,8 +75,7 @@ def ReleaseKey(hexKeyCode):
 
 
 if __name__ == "__main__":
-    while True:
-        PressKey(0x11)
-        time.sleep(1)
-        ReleaseKey(0x11)
-        time.sleep(1)
+    PressKey(0x11)
+    time.sleep(1)
+    ReleaseKey(0x11)
+    time.sleep(1)
